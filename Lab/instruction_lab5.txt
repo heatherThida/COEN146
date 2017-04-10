@@ -1,0 +1,18 @@
+# Lab5
+# COEN 146L (Wed) Thida Aung 
+# TA. Arman Elahi
+# Stop and Go Packet Transfer
+
+# Overview
+
+In this section, describe what you did in this lab and how you accomplished it.
+This lab goal is to implement a partial TCP implementation by keep transferring messages until we get a FIN packet. We identify each packet and ensure FIFO ordering as well as ensuring the correctness of the message to act as TCP.
+The flow of the lab is as follow:
+
+I. TCP emulation 
+- transfer packets as strings by sevializing into Json
+what does a packet look like
+checksum = sum of ascii chars in message 
+sequence a number 
+
+                   packet["message"]=message["message"].upper()

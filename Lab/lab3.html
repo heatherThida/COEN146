@@ -1,0 +1,271 @@
+<html class="gr__students_engr_scu_edu"><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  <link href="lab3_files/main.css" rel="stylesheet">
+  <link href="lab3_files/prism.css" rel="stylesheet">
+  <script src="lab3_files/prism.js"></script>
+
+</head>
+<body class="ta" data-gr-c-s-loaded="true">
+  <main id="main" class="single-column">
+    <header id="header" class="main-header">Lab 3:Copying Data Via Sockets</header>
+
+    <h4 class="section-header"> Introduction </h4>
+
+    <p>
+    In this lab, you're going to transfer data via datagrams. So we'll create  <strong> UDP </strong>
+ socket and transfer data arbitrarily. You'll be using Python to create a
+ simple socket program. There are two parts to this program. The Client 
+will open and read a file and transfer it line by line to your Server. 
+You should first transfer over a new file name and then transfer over 
+the actual data. You can think of the new file name as a sort of 
+preamble or metadata about the file you'll be transferring.
+    </p>
+
+    <p>
+    The frustrating piece of this lab is realizing that you have to 
+Google or search the Linux man pages for just about everything. You 
+won't know what the heck you're actually doing until you finish the lab.
+ That's okay. You should ask all the questions you need to when you demo
+ to me. If you need help, please don't waste your time waiting for me to
+ come around. Just about everyone will need help so this lab will take a
+ while. I've listed <a href="#resources">helpful resources</a> at the bottom of this page. When you ask me a question though, I'll ask you for the sources you've already consulted.
+    </p>
+
+    <h4 class="section-header"> Procedure </h4>
+
+    <h6 class="subsection-header"> 1. Creating the server </h6>
+
+    <p>
+    So the server is pretty interesting. A thing to note, we'll create a
+ very insecure server that just keeps listening for messages. This means
+ that if you're really mean you can interrupt your friends' programs and
+ mess with them.
+    <br><br>
+    For the purposes of this lab, we first expect a datagram which 
+contains a filename. Once you receive this, you should open a file for 
+writing. Then you just keep waiting until the client sends you a 
+message. Everytime you receive a message, you write it out to the file 
+and wait for the next one. One interestig thing is that you should 
+decode all your data as ascii. This will ensure you can properly write 
+out to the file.
+    </p>
+
+
+    <p> Here's an outline of what you'll need to do to connect to the server:
+    </p><ol class="ordered-list">
+      <li> Create a socket object given the proper socket specifications. </li>
+      <li> Bind the socket object to your localhost and port </li>
+      <li> Receive a filename and open a file </li>
+      <li> Poll for all the data that should go into the file </li>
+      <li> Close the socket </li>
+    </ol>
+    <p></p>
+
+    <h6 class="subsection-header"> 2. Creating the client </h6>
+
+    <p>
+    The client should take in the server's hostname and the file name to transfer as command line arguments <strong>argv</strong>.
+ Your client should first send the file name to the server and then it 
+should send the data line by line, encoding it as ascii. In order for 
+these the client to communicate with the server, it needs to know <strong> the hostname </strong> and <strong> the port number </strong>.
+ So it's your job to figure out what the hostname for your machine is. 
+You will be assigned a port number at the beginning of lab.
+    <br><br>
+    This process is reflective of the actual process of making a 
+connection when you access Google. We get the hostname and the port, 
+throw in some routing business and you've got a connection.
+    </p>
+
+    <p> Here's an outline of what you'll need to do to connect to the server:
+    </p><ol class="ordered-list">
+      <li> Resolve the IP Address given the hostname and the port number </li>
+      <li> Create a socket object with the proper socket specifications. </li>
+      <li> Send over a new file name </li>
+      <li> Open the file to transfer and start sending data using the created socket object </li>
+      <li> At the end, you should send a control message, just an empty string to notify the end of file </li>
+      <li> Close the socket </li>
+    </ol>
+    <p></p>
+
+    <p>
+    I know, I make it seem so simple and it really isn't. Thankfully, in
+ the next section, I've outlined and given you a couple of functions to 
+read through.
+    </p>
+
+    <p>
+      Note that there is more than one way to start sending data. You'll
+ find that there are two functions, sendto() and send(). You should look
+ up the ways in which we use each one. They'll accomplish the same goal,
+ but one requires a little more set up.
+    </p>
+
+
+    <h4 class="section-header"> My Kinda Helpful Guidance  </h4>
+
+    <p class="warning">
+    If you ask me about the functions, I'll ask you a question about the
+ man pages before I answer you. Looking up documentation is a skill that
+ you need to learn, so just read the man pages before asking me 
+questions.
+    </p>
+
+    <p>
+    So there are five different "coordinates" you need to specify for a socket:
+    </p>
+
+    <pre class=" language-python">    <code class=" language-python">
+        Address Family <span class="token operator">-</span> What type of address are you trying to find<span class="token punctuation">,</span> IPv4<span class="token punctuation">,</span> IPv6<span class="token punctuation">.</span> <span class="token punctuation">(</span>For this lab we use IPv4<span class="token punctuation">)</span>
+        Socket Type <span class="token operator">-</span> What sorts of messages are you sending
+        Protocol <span class="token operator">-</span> You won<span class="token string">'t really wory about this, it'</span>s just further specification
+        Address <span class="token operator">-</span> The address you're connecting to
+        Port <span class="token operator">-</span> The port number you're connecting to
+    </code>
+    </pre>
+
+    <p>
+    Here's a high level overview of useful functions for this lab. 
+Anything that begins with socket. means it's static socket library 
+function. Anything that begins with sock. is a method to be called on a 
+socket object.
+    </p>
+
+    <pre class=" language-python">    <code class=" language-python">
+      <span class="token comment" spellcheck="true"># creates a socket object</span>
+      socket<span class="token punctuation">.</span>socket<span class="token punctuation">(</span>family<span class="token punctuation">,</span> type<span class="token punctuation">,</span> proto<span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># connect socket object to an interface on your system</span>
+      sock<span class="token punctuation">.</span>bind<span class="token punctuation">(</span>address<span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># receive a tuple =&gt; (data, address) over your socket object</span>
+      sock<span class="token punctuation">.</span>recvfrom<span class="token punctuation">(</span>bufsize<span class="token punctuation">,</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># receive just data over your socket object, requires connect()</span>
+      sock<span class="token punctuation">.</span>recv<span class="token punctuation">(</span>bufsize<span class="token punctuation">,</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># call this method on a string to decode data into ascii format</span>
+      str<span class="token punctuation">.</span>decode<span class="token punctuation">(</span><span class="token string">'ascii'</span><span class="token punctuation">,</span> <span class="token string">'ignore'</span><span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># call this method on a string to encode data into ascii format</span>
+      str<span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token string">'ascii'</span><span class="token punctuation">,</span> <span class="token string">'ignore'</span><span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># get the useful socket coordinates</span>
+      socket<span class="token punctuation">.</span>getaddrinfo<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># connect to a remote socket so you can use recv() and send()</span>
+      sock<span class="token punctuation">.</span>connect<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># send data over your socket object</span>
+      sock<span class="token punctuation">.</span>sendto<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># send data over your socket object without specifying addr, requires connect</span>
+      sock<span class="token punctuation">.</span>send<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+      <span class="token comment" spellcheck="true"># clean up for your socket -- every operation will fail after this</span>
+      sock<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    </code>
+    </pre>
+
+    <h4 class="section-header"> Submission Guidelines </h4>
+
+    <p>
+    Because I know you can find all the code for this online, you have 
+to answer a couple questions, these can all be found in the report 
+template (which is in Markdown format). You can open it in VI or any 
+normal text editor. You should 3 files named in the following way:
+    </p>
+
+    <ol class="ordered-list">
+      <li> client.py - which contains your client code </li>
+      <li> server.py - which contains your server code </li>
+      <li> report.md - report grabbed from the temmplate </li>
+    </ol>
+
+    <p>
+    You should then create a zip file containing all three files. In the
+ end, you submit the zip file. Here's some math to help you out. I have 3
+ files. I combine them into one by making a zipfile. I then upload JUST 
+the zipfile to Camino (whenever it comes back up).
+    </p>
+
+    <h4 class="section-header"> Tips </h4>
+
+    <h6 class="subsection-header">  1. Port Numbers </h6>
+
+    <p>
+    To eliminate a source of bugs, please use the assigned port numbers.
+ This will alleviate a certain class of bugs. Everyone will get their 
+own, you're welcome to see what happens when you and someone else have 
+the same port number.
+    </p>
+
+    <h6 class="subsection-header">  2. Hostnames </h6>
+
+    <p>
+    You can find out the proper hostname by one of the three following methods.
+    </p>
+
+    <ol class="ordered-list">
+
+      <li>
+      The hostname should be specified on the command line as <strong>linux608xx</strong>. Replace the <strong>xx</strong> with  the specific machine number.
+      </li>
+
+      <li>
+      The hostname of the machine can also be found on the command line after your user name.
+      </li>
+
+      <li>
+      You can also just use the string "localhost"
+      </li>
+
+    </ol>
+
+    <h6 class="subsection-header" id="resources">  3. helpful resources</h6>
+
+    <ol class="ordered-list">
+      <li> <a href="https://docs.python.org/3.5/library/socket.html"> Socket Documentation for Python </a></li>
+      <li> <a href="https://docs.python.org/2/howto/sockets.html"> Basic HowTo for Sockets</a> in Python 2.7 (most things still apply)</li>
+      <li> <a href="http://www.techbeamers.com/python-tutorial-essentials-of-python-socket-programming/"> Python Tutorial for Creating Sockets </a></li>
+      <li> <a href="http://beej.us/guide/bgnet/output/html/multipage/syscalls.html#sendtorecv"> Socket Programming in C (useful info on functions) </a></li>
+      <li> <a href="https://docs.google.com/a/scu.edu/spreadsheets/d/1pQKRSKmP-Y9xTfO2LhFCHyn69uJjMsOOJVt8X2KFjaU/edit?usp=sharing"> Rubric for Grading Labs </a> </li>
+    </ol>
+
+    <h6 class="subsection-header">  4. Questions </h6>
+
+
+    <ol class="ordered-list">
+
+      <li>
+      Describe UDP in your own words.
+      </li>
+
+      <li>
+      What does the bind function do? Do we need it on the client?
+      </li>
+
+      <li>
+      In your own words, describe what a socket is.
+      </li>
+
+      <li>
+      What are the pieces used to create a socket. What is each one for?.
+      </li>
+
+    </ol>
+
+    <h6 class="subsection-header">  5. Lab Templates </h6>
+    <p>
+    Note that this is not valid Python code. A lot of the syntax is correct, but not everything.
+    </p>
+
+    <ol class="ordered-list">
+      <li><a href="http://students.engr.scu.edu/%7Eaelahi/ta/146/server_lab3.py"> Server Template</a></li>
+      <li><a href="http://students.engr.scu.edu/%7Eaelahi/ta/146/client_lab3.py"> Client Template</a></li>
+      <li><a href="http://students.engr.scu.edu/%7Eaelahi/ta/146/report_lab3.md"> Report Template</a></li>
+    </ol>
+    
+  </main>
+
+</body></html>
